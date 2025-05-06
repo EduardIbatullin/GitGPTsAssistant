@@ -37,23 +37,23 @@ jobs:
       - name: Run pytest
         run: pytest --disable-warnings -q
 
-  deploy:
-    needs: test
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-
-    container:
-      image: ghcr.io/railwayapp/cli:latest
-
-    env:
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-      RAILWAY_SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}
-      MY_GITHUB_TOKEN:    ${{ secrets.MY_GITHUB_TOKEN }}
-      MY_GITHUB_USERNAME: ${{ secrets.MY_GITHUB_USERNAME }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Deploy via Railway CLI
-        run: railway up --service=${{ env.RAILWAY_SERVICE_ID }}
+#  deploy:
+#    needs: test
+#    if: github.ref == 'refs/heads/main'
+#    runs-on: ubuntu-latest
+#
+#    container:
+#      image: ghcr.io/railwayapp/cli:latest
+#
+#    env:
+#      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+#      RAILWAY_SERVICE_ID: ${{ secrets.RAILWAY_SERVICE_ID }}
+#      MY_GITHUB_TOKEN:    ${{ secrets.MY_GITHUB_TOKEN }}
+#      MY_GITHUB_USERNAME: ${{ secrets.MY_GITHUB_USERNAME }}
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v3
+#
+#      - name: Deploy via Railway CLI
+#        run: railway up --service=${{ env.RAILWAY_SERVICE_ID }}
