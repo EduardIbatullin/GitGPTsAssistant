@@ -2,7 +2,7 @@
 
 from fastapi import Depends
 from app.infrastructure.github_client import GitHubClient
-from app.domain.services.github_service import GitHubService
+from app.domain.services.file_service import FileService
 
 def get_github_client() -> GitHubClient:
     """
@@ -16,15 +16,13 @@ def get_github_client() -> GitHubClient:
     """
     return GitHubClient()
 
-def get_github_service(
+def get_file_service(
     client: GitHubClient = Depends(get_github_client),
-) -> GitHubService:
+) -> FileService:
     """
-    Функция для инъекции зависимости GitHub сервиса.
-    
-    Оборачивает GitHubClient в GitHubService, инкапсулирующий бизнес-логику.
+    Функция для инъекции зависимости GitHub сервиса (FileService).
 
     Returns:
-        GitHubService: Экземпляр сервиса для работы с GitHub API.
+        FileService: Экземпляр сервиса для работы с GitHub API.
     """
-    return GitHubService(client)
+    return FileService(client)
