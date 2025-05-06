@@ -11,13 +11,13 @@
 
 ---
 
-### 📁 Фаза 1. Базовый CRUD для файлов
-- `GET /repos/{repo}/structure`
-- `GET /repos/{repo}/file`
-- `POST /repos/{repo}/file`
-- `PUT /repos/{repo}/file`
-- `DELETE /repos/{repo}/file`
-- Тесты и документация.
+### 📁 ~~Фаза 1. Базовый CRUD для файлов~~ ✅ *(завершена 2025‑05‑06)*
+- [x] `GET /repos/{repo}/structure`
+- [x] `GET /repos/{repo}/file`
+- [x] `POST /repos/{repo}/file`
+- [x] `PUT /repos/{repo}/file`
+- [x] `DELETE /repos/{repo}/file`
+- [x] Тесты и документация
 
 ---
 
