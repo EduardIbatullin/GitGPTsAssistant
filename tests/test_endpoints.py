@@ -5,12 +5,12 @@ from fastapi.testclient import TestClient
 from fastapi import status
 
 from app.api.main import app
-from app.api.dependencies import get_github_service
+from app.api.dependencies import get_file_service
 from app.domain.models import FileContentResponse, RepoStructureResponse
 from app.core.exceptions import ResourceNotFoundError, InvalidRepositoryError
 
 # --- Сервис-заглушка для успешных сценариев ---
-class DummyGitHubService:
+class DummyFileService:
     async def get_repo_structure(self, repo: str) -> list:
         return [
             {"path": "", "type": "dir"},
@@ -43,7 +43,7 @@ class DummyGitHubService:
 
 
 # --- Сервис-заглушка для ошибок ---
-class ErrorGitHubService:
+class ErrorFileService:
     def __init__(self, exc):
         self.exc = exc
 
@@ -67,7 +67,7 @@ class ErrorGitHubService:
 client = TestClient(app)
 
 # Переназначение зависимости для успешных тестов
-app.dependency_overrides[get_github_service] = lambda: DummyGitHubService()
+app.dependency_overrides[get_file_service] = lambda: DummyFileService()
 
 
 def test_get_repo_structure():
@@ -221,7 +221,7 @@ def test_delete_file(path, filename):
 ])
 def test_error_scenarios(exc, method, endpoint, payload, exp_status, exp_detail):
     # Подменяем зависимость на сервис, который сразу бросает нужное исключение
-    app.dependency_overrides[get_github_service] = lambda: ErrorGitHubService(exc)
+    app.dependency_overrides[get_file_service] = lambda: ErrorFileService(exc)
 
     client = TestClient(app)
     if method == "DELETE" and payload is not None:
