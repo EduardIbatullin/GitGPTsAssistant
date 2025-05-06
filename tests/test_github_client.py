@@ -9,18 +9,24 @@ from app.infrastructure.github_client import GitHubClient
 async def client():
     return GitHubClient()
 
+def make_mock_response(data: dict) -> AsyncMock:
+    mock_response = AsyncMock()
+    mock_response.status_code = 200
+    mock_response.json = AsyncMock(return_value=data)
+    return mock_response
+
 @patch("httpx.AsyncClient.get", new_callable=AsyncMock)
 @pytest.mark.asyncio
 async def test_list_repo_tree(mock_get, client):
     mock_get.side_effect = [
-        AsyncMock(status_code=200, json=AsyncMock(return_value={"default_branch": "main"})),
-        AsyncMock(status_code=200, json=AsyncMock(return_value={
+        make_mock_response({"default_branch": "main"}),
+        make_mock_response({
             "tree": [
                 {"path": "README.md", "type": "blob"},
                 {"path": "src", "type": "tree"},
                 {"path": "src/main.py", "type": "blob"},
             ]
-        }))
+        }),
     ]
 
     tree = await client.list_repo_tree("test-repo")
