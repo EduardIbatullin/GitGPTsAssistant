@@ -17,33 +17,47 @@ class GitHubClient:
         self.base_url = "https://api.github.com"
         self.headers = {"Authorization": f"Bearer {MY_GITHUB_TOKEN}"}
 
-    # async def get_repo_info(self, repo: str) -> dict:
-    #     """
-    #     Получить информацию о репозитории.
-    #     Позволяет отличить 404 по репозиторию от 404 по файлу.
-    #     """
-    #     url = f"{self.base_url}/repos/{MY_GITHUB_USERNAME}/{repo}"
-    #     async with httpx.AsyncClient() as client:
-    #         response = await client.get(url, headers=self.headers)
-    #     response.raise_for_status()
-    #     return response.json()
-
-
-    async def list_repo_tree(self, repo: str) -> list:
+    async def get_repo_info(self, repo: str) -> dict:
         """
-        Получение структуры репозитория.
+        Получение мета-информации о репозитории (включая default_branch).
 
         Args:
             repo (str): Имя репозитория.
 
         Returns:
-            list: Дерево файлов и папок.
+            dict: Полная информация о репозитории.
         """
-        url = f"{self.base_url}/repos/{MY_GITHUB_USERNAME}/{repo}/contents"
+        url = f"{self.base_url}/repos/{MY_GITHUB_USERNAME}/{repo}"
         async with httpx.AsyncClient() as client:
             response = await client.get(url, headers=self.headers)
         response.raise_for_status()
         return response.json()
+
+
+    async def list_repo_tree(self, repo: str) -> list:
+        """
+        Получение полного дерева файлов и папок репозитория рекурсивно.
+
+        Args:
+            repo (str): Имя репозитория.
+
+        Returns:
+            list: Список узлов дерева (type="blob" для файлов, "tree" для папок).
+        """
+        # Узнаём default_branch, чтобы обойти все ветки
+        repo_info = await self.get_repo_info(repo)
+        branch = repo_info.get("default_branch", "main")
+
+        url = (
+            f"{self.base_url}/repos/"
+            f"{MY_GITHUB_USERNAME}/{repo}/git/trees/{branch}"
+            "?recursive=1"
+        )
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=self.headers)
+        response.raise_for_status()
+        data = response.json()
+        return data.get("tree", [])
 
     async def get_file_content(self, repo: str, path: str) -> dict:
         """
