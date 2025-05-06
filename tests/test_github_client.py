@@ -2,30 +2,26 @@
 
 import pytest
 import pytest_asyncio
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 from app.infrastructure.github_client import GitHubClient
 
 @pytest_asyncio.fixture
 async def client():
     return GitHubClient()
 
-class MockResponse:
-    def __init__(self, data: dict):
-        self._data = data
-        self.status_code = 200
-
-    async def json(self):
-        return self._data
-
-    def raise_for_status(self):
-        pass
+def make_async_response(data: dict) -> AsyncMock:
+    mock = AsyncMock()
+    mock.status_code = 200
+    mock.json.return_value = data
+    mock.raise_for_status.return_value = None
+    return mock
 
 @patch("httpx.AsyncClient.get")
 @pytest.mark.asyncio
 async def test_list_repo_tree(mock_get, client):
     mock_get.side_effect = [
-        MockResponse({"default_branch": "main"}),
-        MockResponse({
+        make_async_response({"default_branch": "main"}),
+        make_async_response({
             "tree": [
                 {"path": "README.md", "type": "blob"},
                 {"path": "src", "type": "tree"},
