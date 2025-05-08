@@ -83,7 +83,15 @@ def test_get_repo_structure():
     """Проверка получения структуры репозитория (файлы и папки)."""
     response = client.get("/repos/test-repo/structure")
     assert response.status_code == 200
-    assert response.json()["repo"] == "test-repo"
+    assert response.json() == {
+        "repo": "test-repo",
+        "tree": [
+            {"path": "", "type": "dir"},
+            {"path": "README.md", "type": "file"},
+            {"path": "subdir", "type": "dir"},
+            {"path": "subdir/nested.txt", "type": "file"},
+        ],
+    }
 
 
 def test_get_branches():
@@ -101,6 +109,8 @@ def test_get_file_content_root():
     assert response.status_code == 200
     data = response.json()
     assert data["path"] == "README.md"
+    assert data["content"] == "Content of README.md"
+    assert data["encoding"] == "utf-8"
 
 
 def test_get_file_content_subfolder():
@@ -109,6 +119,8 @@ def test_get_file_content_subfolder():
     assert response.status_code == 200
     data = response.json()
     assert data["path"] == "subdir/nested.txt"
+    assert data["content"] == "Content of subdir/nested.txt"
+    assert data["encoding"] == "utf-8"
 
 
 @pytest.mark.parametrize("path, filename", [("", "root.txt"), ("subdir", "nested.txt")])
@@ -122,7 +134,11 @@ def test_create_file(path, filename):
     }
     response = client.post("/repos/test-repo/file", json=payload)
     assert response.status_code == 200
-    assert response.json()["content"] == payload["content"]
+    data = response.json()
+    expected = filename if path == "" else f"{path}/{filename}"
+    assert data["path"] == expected
+    assert data["content"] == payload["content"]
+    assert data["encoding"] == "utf-8"
 
 
 @pytest.mark.parametrize("path,filename", [("", "root.txt"), ("subdir", "nested.txt")])
@@ -136,7 +152,11 @@ def test_update_file(path, filename):
     }
     response = client.put("/repos/test-repo/file", json=payload)
     assert response.status_code == 200
-    assert response.json()["content"] == payload["content"]
+    data = response.json()
+    expected = filename if path == "" else f"{path}/{filename}"
+    assert data["path"] == expected
+    assert data["content"] == payload["content"]
+    assert data["encoding"] == "utf-8"
 
 
 @pytest.mark.parametrize("path,filename", [("", "root.txt"), ("subdir", "nested.txt")])
@@ -149,7 +169,11 @@ def test_delete_file(path, filename):
     }
     response = client.request("DELETE", "/repos/test-repo/file", json=payload)
     assert response.status_code == 200
-    assert response.json()["content"] == ""
+    data = response.json()
+    expected = filename if path == "" else f"{path}/{filename}"
+    assert data["path"] == expected
+    assert data["content"] == ""
+    assert data["encoding"] == "utf-8"
 
 
 @pytest.mark.parametrize("exc,method,endpoint,payload,exp_status,exp_detail", [
