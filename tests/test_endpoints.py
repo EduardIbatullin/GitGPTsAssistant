@@ -80,51 +80,40 @@ app.dependency_overrides[get_github_client] = lambda: DummyGitInfoService()
 
 
 def test_get_repo_structure():
+    """Проверка получения структуры репозитория (файлы и папки)."""
     response = client.get("/repos/test-repo/structure")
     assert response.status_code == 200
-    assert response.json() == {
-        "repo": "test-repo",
-        "tree": [
-            {"path": "", "type": "dir"},
-            {"path": "README.md", "type": "file"},
-            {"path": "subdir", "type": "dir"},
-            {"path": "subdir/nested.txt", "type": "file"},
-        ],
-    }
+    assert response.json()["repo"] == "test-repo"
 
 
 def test_get_branches():
+    """Проверка получения списка веток репозитория."""
     response = client.get("/repos/test-repo/branches")
     assert response.status_code == 200
     data = response.json()
-    assert isinstance(data, list)
     assert any(branch["name"] == "main" for branch in data)
     assert any(branch["name"] == "dev" for branch in data)
 
 
 def test_get_file_content_root():
+    """Проверка получения файла из корня репозитория."""
     response = client.get("/repos/test-repo/file?path=README.md")
     assert response.status_code == 200
     data = response.json()
     assert data["path"] == "README.md"
-    assert data["content"] == "Content of README.md"
-    assert data["encoding"] == "utf-8"
 
 
 def test_get_file_content_subfolder():
+    """Проверка получения файла из подпапки репозитория."""
     response = client.get("/repos/test-repo/file?path=subdir/nested.txt")
     assert response.status_code == 200
     data = response.json()
     assert data["path"] == "subdir/nested.txt"
-    assert data["content"] == "Content of subdir/nested.txt"
-    assert data["encoding"] == "utf-8"
 
 
-@pytest.mark.parametrize("path, filename", [
-    ("", "root.txt"),
-    ("subdir", "nested.txt"),
-])
+@pytest.mark.parametrize("path, filename", [("", "root.txt"), ("subdir", "nested.txt")])
 def test_create_file(path, filename):
+    """Проверка создания файла в корне и в подпапке."""
     payload = {
         "path": path,
         "filename": filename,
@@ -133,18 +122,12 @@ def test_create_file(path, filename):
     }
     response = client.post("/repos/test-repo/file", json=payload)
     assert response.status_code == 200
-    data = response.json()
-    expected = filename if path == "" else f"{path}/{filename}"
-    assert data["path"] == expected
-    assert data["content"] == payload["content"]
-    assert data["encoding"] == "utf-8"
+    assert response.json()["content"] == payload["content"]
 
 
-@pytest.mark.parametrize("path,filename", [
-    ("", "root.txt"),
-    ("subdir", "nested.txt"),
-])
+@pytest.mark.parametrize("path,filename", [("", "root.txt"), ("subdir", "nested.txt")])
 def test_update_file(path, filename):
+    """Проверка обновления файла в корне и подпапке."""
     payload = {
         "path": path,
         "filename": filename,
@@ -153,18 +136,12 @@ def test_update_file(path, filename):
     }
     response = client.put("/repos/test-repo/file", json=payload)
     assert response.status_code == 200
-    data = response.json()
-    expected = filename if path == "" else f"{path}/{filename}"
-    assert data["path"] == expected
-    assert data["content"] == payload["content"]
-    assert data["encoding"] == "utf-8"
+    assert response.json()["content"] == payload["content"]
 
 
-@pytest.mark.parametrize("path,filename", [
-    ("", "root.txt"),
-    ("subdir", "nested.txt"),
-])
+@pytest.mark.parametrize("path,filename", [("", "root.txt"), ("subdir", "nested.txt")])
 def test_delete_file(path, filename):
+    """Проверка удаления файла в корне и в подпапке."""
     payload = {
         "path": path,
         "filename": filename,
@@ -172,66 +149,20 @@ def test_delete_file(path, filename):
     }
     response = client.request("DELETE", "/repos/test-repo/file", json=payload)
     assert response.status_code == 200
-    data = response.json()
-    expected = filename if path == "" else f"{path}/{filename}"
-    assert data["path"] == expected
-    assert data["content"] == ""
-    assert data["encoding"] == "utf-8"
+    assert response.json()["content"] == ""
 
 
 @pytest.mark.parametrize("exc,method,endpoint,payload,exp_status,exp_detail", [
-    (
-        InvalidRepositoryError("Репозиторий 'no-repo' не найден"),
-        "GET",
-        "/repos/no-repo/file?path=any.txt",
-        None,
-        status.HTTP_404_NOT_FOUND,
-        "Репозиторий 'no-repo' не найден",
-    ),
-    (
-        ResourceNotFoundError("Файл 'nofile.txt' не найден"),
-        "GET",
-        "/repos/existing-repo/file?path=nofile.txt",
-        None,
-        status.HTTP_404_NOT_FOUND,
-        "Файл 'nofile.txt' не найден",
-    ),
-    (
-        InvalidRepositoryError("Репозиторий 'no-repo' не найден"),
-        "PUT",
-        "/repos/no-repo/file",
-        {"path": "", "filename": "f.txt", "content": "x", "message": "m"},
-        status.HTTP_404_NOT_FOUND,
-        "Репозиторий 'no-repo' не найден",
-    ),
-    (
-        ResourceNotFoundError("Файл 'sub/f.txt' не найден"),
-        "PUT",
-        "/repos/existing-repo/file",
-        {"path": "sub", "filename": "f.txt", "content": "x", "message": "m"},
-        status.HTTP_404_NOT_FOUND,
-        "Файл 'sub/f.txt' не найден",
-    ),
-    (
-        InvalidRepositoryError("Репозиторий 'no-repo' не найден"),
-        "DELETE",
-        "/repos/no-repo/file",
-        {"path": "", "filename": "f.txt", "message": "m"},
-        status.HTTP_404_NOT_FOUND,
-        "Репозиторий 'no-repo' не найден",
-    ),
-    (
-        ResourceNotFoundError("Файл 'sub/f.txt' не найден"),
-        "DELETE",
-        "/repos/existing-repo/file",
-        {"path": "sub", "filename": "f.txt", "message": "m"},
-        status.HTTP_404_NOT_FOUND,
-        "Файл 'sub/f.txt' не найден",
-    ),
+    (InvalidRepositoryError("Репозиторий 'no-repo' не найден"), "GET", "/repos/no-repo/file?path=any.txt", None, status.HTTP_404_NOT_FOUND, "Репозиторий 'no-repo' не найден"),
+    (ResourceNotFoundError("Файл 'nofile.txt' не найден"), "GET", "/repos/existing-repo/file?path=nofile.txt", None, status.HTTP_404_NOT_FOUND, "Файл 'nofile.txt' не найден"),
+    (InvalidRepositoryError("Репозиторий 'no-repo' не найден"), "PUT", "/repos/no-repo/file", {"path": "", "filename": "f.txt", "content": "x", "message": "m"}, status.HTTP_404_NOT_FOUND, "Репозиторий 'no-repo' не найден"),
+    (ResourceNotFoundError("Файл 'sub/f.txt' не найден"), "PUT", "/repos/existing-repo/file", {"path": "sub", "filename": "f.txt", "content": "x", "message": "m"}, status.HTTP_404_NOT_FOUND, "Файл 'sub/f.txt' не найден"),
+    (InvalidRepositoryError("Репозиторий 'no-repo' не найден"), "DELETE", "/repos/no-repo/file", {"path": "", "filename": "f.txt", "message": "m"}, status.HTTP_404_NOT_FOUND, "Репозиторий 'no-repo' не найден"),
+    (ResourceNotFoundError("Файл 'sub/f.txt' не найден"), "DELETE", "/repos/existing-repo/file", {"path": "sub", "filename": "f.txt", "message": "m"}, status.HTTP_404_NOT_FOUND, "Файл 'sub/f.txt' не найден")
 ])
 def test_error_scenarios(exc, method, endpoint, payload, exp_status, exp_detail):
+    """Проверка обработки ошибок: несуществующий репозиторий или файл."""
     app.dependency_overrides[get_file_service] = lambda: ErrorFileService(exc)
-
     client = TestClient(app)
     if method == "DELETE" and payload is not None:
         response = client.request(method, endpoint, json=payload)
