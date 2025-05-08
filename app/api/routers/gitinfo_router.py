@@ -6,6 +6,15 @@ router = APIRouter()
 
 @router.get("/repos/{repo}/branches", tags=["Git Metadata"])
 async def get_branches(repo: str, service: GitInfoService = Depends(get_github_client)):
+    """
+    Получить список всех веток указанного репозитория.
+
+    Args:
+        repo (str): Название репозитория GitHub.
+
+    Returns:
+        list: Список словарей с информацией о ветках (имя, SHA и т.д.).
+    """
     try:
         return await service.list_branches(repo)
     except Exception as e:
