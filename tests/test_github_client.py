@@ -12,6 +12,7 @@ async def client():
 @patch("httpx.AsyncClient.get")
 @pytest.mark.asyncio
 async def test_list_repo_tree(mock_get, client):
+    """Проверка получения дерева репозитория с файлами и папками."""
     mock_repo_info = Mock()
     mock_repo_info.status_code = 200
     mock_repo_info.json = lambda: {"default_branch": "main"}
@@ -40,6 +41,7 @@ async def test_list_repo_tree(mock_get, client):
 @patch("httpx.AsyncClient.get")
 @pytest.mark.asyncio
 async def test_list_branches(mock_get, client):
+    """Проверка получения списка веток репозитория через GitHub API."""
     mock_response = Mock()
     mock_response.status_code = 200
     mock_response.json = lambda: [
