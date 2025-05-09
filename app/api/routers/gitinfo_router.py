@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query
-from typing import List, Optional
+from typing import List, Annotated
 
 from app.api.dependencies import get_github_client
 from app.domain.services.gitinfo_service import GitInfoService
@@ -22,7 +22,7 @@ async def get_branches(
 @router.get("/repos/{repo}/commits", response_model=List[CommitResponse])
 async def get_commits(
     repo: str,
-    path: Optional[str] = Query(default=None),
+    path: Annotated[str | None, Query()] = None,
     service: GitInfoService = Depends(get_github_client)
 ) -> List[CommitResponse]:
     return await service.list_commits(repo, path)
