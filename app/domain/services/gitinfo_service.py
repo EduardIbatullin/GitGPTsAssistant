@@ -28,3 +28,27 @@ class GitInfoService:
             list: Список словарей с информацией о коммитах.
         """
         return await self.github_client.list_commits(repo, path)
+
+    async def list_pull_requests(self, repo: str) -> list:
+        """
+        Получает список pull requests из указанного репозитория.
+
+        Args:
+            repo (str): Название репозитория.
+
+        Returns:
+            list: Список pull requests.
+        """
+        return await self.github_client.list_pull_requests(repo)
+
+    async def list_issues(self, repo: str) -> list:
+        """
+        Получает список issues из указанного репозитория.
+
+        Args:
+            repo (str): Название репозитория.
+
+        Returns:
+            list: Список issues.
+        """
+        return await self.github_client.list_issues(repo)
