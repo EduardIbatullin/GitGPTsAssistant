@@ -21,12 +21,12 @@
 
 ---
 
-### 🔍 Фаза 2. Метаданные Git
-- `GET /repos/{repo}/branches`
-- `GET /repos/{repo}/commits?path=...`
-- `GET /repos/{repo}/pulls`
-- `GET /repos/{repo}/issues`
-- Моки, тесты, примеры.
+### 🔍 ~~Фаза 2. Метаданные Git~~ ✅ *(завершена 2025‑05‑07)*
+- [x] `GET /repos/{repo}/branches`
+- [x] `GET /repos/{repo}/commits?path=...`
+- [x] `GET /repos/{repo}/pulls`
+- [x] `GET /repos/{repo}/issues`
+- [x] Моки, тесты, примеры
 
 ---
 
