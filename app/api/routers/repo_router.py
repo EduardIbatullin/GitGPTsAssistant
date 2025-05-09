@@ -1,6 +1,6 @@
-# app/api/routers/repo_router.py
+from fastapi import APIRouter, Depends, Query
+from typing import Annotated
 
-from fastapi import APIRouter, Depends
 from app.domain.services.file_service import FileService
 from app.domain.models import (
     RepoStructureResponse,
@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.get("/repos/{repo}/structure", response_model=RepoStructureResponse)
 async def get_repo_structure(
-    repo: str, 
+    repo: str,
     file_service: FileService = Depends(get_file_service)
 ) -> RepoStructureResponse:
     structure = await file_service.get_repo_structure(repo)
@@ -23,16 +23,16 @@ async def get_repo_structure(
 
 @router.get("/repos/{repo}/file", response_model=FileContentResponse)
 async def get_file_content(
-    repo: str, 
-    path: str, 
+    repo: str,
+    path: Annotated[str, Query()],
     file_service: FileService = Depends(get_file_service)
 ) -> FileContentResponse:
     return await file_service.get_file_content(repo, path)
 
 @router.post("/repos/{repo}/file", response_model=FileContentResponse)
 async def create_new_file(
-    repo: str, 
-    file_data: CreateFileRequest, 
+    repo: str,
+    file_data: CreateFileRequest,
     file_service: FileService = Depends(get_file_service)
 ) -> FileContentResponse:
     return await file_service.create_file(
