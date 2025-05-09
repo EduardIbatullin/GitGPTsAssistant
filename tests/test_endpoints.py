@@ -49,6 +49,18 @@ class DummyGitInfoService:
             {"name": "dev", "commit": {"sha": "def456"}}
         ]
 
+    async def list_pull_requests(self, repo: str) -> list:
+        return [
+            {"id": 1, "title": "Fix bug", "state": "open"},
+            {"id": 2, "title": "Add feature", "state": "closed"}
+        ]
+
+    async def list_issues(self, repo: str) -> list:
+        return [
+            {"id": 101, "title": "Issue one", "state": "open"},
+            {"id": 102, "title": "Issue two", "state": "closed"}
+        ]
+
 
 # --- Сервис-заглушка для ошибок ---
 class ErrorFileService:
@@ -103,6 +115,24 @@ def test_get_branches():
     assert any(branch["name"] == "dev" for branch in data)
 
 
+def test_get_pull_requests():
+    """Проверка получения списка pull requests."""
+    response = client.get("/repos/test-repo/pulls")
+    assert response.status_code == 200
+    data = response.json()
+    assert {"id": 1, "title": "Fix bug", "state": "open"} in data
+    assert {"id": 2, "title": "Add feature", "state": "closed"} in data
+
+
+def test_get_issues():
+    """Проверка получения списка issues."""
+    response = client.get("/repos/test-repo/issues")
+    assert response.status_code == 200
+    data = response.json()
+    assert {"id": 101, "title": "Issue one", "state": "open"} in data
+    assert {"id": 102, "title": "Issue two", "state": "closed"} in data
+
+
 def test_get_file_content_root():
     """Проверка получения файла из корня репозитория."""
     response = client.get("/repos/test-repo/file?path=README.md")
@@ -111,6 +141,7 @@ def test_get_file_content_root():
     assert data["path"] == "README.md"
     assert data["content"] == "Content of README.md"
     assert data["encoding"] == "utf-8"
+
 
 def test_get_file_content_subfolder():
     """Проверка получения файла из подпапки репозитория."""
