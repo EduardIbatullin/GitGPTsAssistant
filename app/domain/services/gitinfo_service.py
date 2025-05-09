@@ -15,3 +15,16 @@ class GitInfoService:
             list: Список словарей с информацией о ветках.
         """
         return await self.github_client.list_branches(repo)
+
+    async def list_commits(self, repo: str, path: str = None) -> list:
+        """
+        Получает список коммитов по репозиторию или конкретному пути.
+
+        Args:
+            repo (str): Название репозитория.
+            path (str, optional): Путь к файлу или директории.
+
+        Returns:
+            list: Список словарей с информацией о коммитах.
+        """
+        return await self.github_client.list_commits(repo, path)
