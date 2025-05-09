@@ -77,7 +77,7 @@
 ## ▶️ Запуск сервера
 
 ```bash
-uvicorn app.api.main:app --reload --host 127.0.0.1 --port 8000
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 * Swagger UI: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
@@ -109,6 +109,26 @@ PUT /repos/{repo}/file
 ### Удалить файл
 ```
 DELETE /repos/{repo}/file
+```
+
+### Получить список веток
+```
+GET /repos/{repo}/branches
+```
+
+### Получить список коммитов
+```
+GET /repos/{repo}/commits?path=src/main.py
+```
+
+### Получить список Pull Requests
+```
+GET /repos/{repo}/pulls
+```
+
+### Получить список Issues
+```
+GET /repos/{repo}/issues
 ```
 
 (Подробнее — см. Swagger или `test_requests.http`)
