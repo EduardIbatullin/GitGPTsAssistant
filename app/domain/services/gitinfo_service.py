@@ -1,4 +1,5 @@
 from app.infrastructure.github_client import GitHubClient
+from app.core.exceptions import GitHubAPIError
 
 class GitInfoService:
     def __init__(self, github_client: GitHubClient):
@@ -14,7 +15,10 @@ class GitInfoService:
         Returns:
             list: Список словарей с информацией о ветках.
         """
-        return await self.github_client.list_branches(repo)
+        try:
+            return await self.github_client.list_branches(repo)
+        except Exception as e:
+            raise GitHubAPIError(str(e), status_code=500)
 
     async def list_commits(self, repo: str, path: str = None) -> list:
         """
@@ -27,7 +31,10 @@ class GitInfoService:
         Returns:
             list: Список словарей с информацией о коммитах.
         """
-        return await self.github_client.list_commits(repo, path)
+        try:
+            return await self.github_client.list_commits(repo, path)
+        except Exception as e:
+            raise GitHubAPIError(str(e), status_code=500)
 
     async def list_pull_requests(self, repo: str) -> list:
         """
@@ -39,7 +46,10 @@ class GitInfoService:
         Returns:
             list: Список pull requests.
         """
-        return await self.github_client.list_pull_requests(repo)
+        try:
+            return await self.github_client.list_pull_requests(repo)
+        except Exception as e:
+            raise GitHubAPIError(str(e), status_code=500)
 
     async def list_issues(self, repo: str) -> list:
         """
@@ -51,4 +61,7 @@ class GitInfoService:
         Returns:
             list: Список issues.
         """
-        return await self.github_client.list_issues(repo)
+        try:
+            return await self.github_client.list_issues(repo)
+        except Exception as e:
+            raise GitHubAPIError(str(e), status_code=500)
