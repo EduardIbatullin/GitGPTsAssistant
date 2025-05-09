@@ -4,7 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import status
 
-from app.api.main import app
+from app.main import app
 from app.api.dependencies import get_file_service, get_github_client
 from app.domain.models import FileContentResponse, RepoStructureResponse
 from app.core.exceptions import ResourceNotFoundError, InvalidRepositoryError
