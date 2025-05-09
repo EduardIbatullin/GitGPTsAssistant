@@ -106,7 +106,7 @@ def test_get_branches():
 def test_get_file_content_root():
     """Проверка получения файла из корня репозитория."""
     response = client.get("/repos/test-repo/file?path=README.md")
-        assert response.status_code == 200
+    assert response.status_code == 200
     data = response.json()
     assert data["path"] == "README.md"
     assert data["content"] == "Content of README.md"
