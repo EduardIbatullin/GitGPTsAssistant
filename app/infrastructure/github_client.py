@@ -49,6 +49,25 @@ class GitHubClient:
         response.raise_for_status()
         return response.json()
 
+    async def list_commits(self, repo: str, path: str = None) -> list:
+        """
+        Получение списка коммитов репозитория (можно указать конкретный файл).
+
+        Args:
+            repo (str): Имя репозитория.
+            path (str, optional): Путь к файлу или папке.
+
+        Returns:
+            list: Список коммитов (SHA, author, message, date).
+        """
+        url = f"{self.base_url}/repos/{MY_GITHUB_USERNAME}/{repo}/commits"
+        if path:
+            url += f"?path={path}"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=self.headers)
+        response.raise_for_status()
+        return response.json()
+
     async def list_repo_tree(self, repo: str) -> list:
         """
         Получение полного дерева файлов и папок репозитория рекурсивно.
